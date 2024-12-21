@@ -58,7 +58,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'user')]
     private Collection $reservations;
 
+    #[ORM\Column(nullable: true)]
     private ?string $plainPassword = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTime $updatedAt = null;
 
     public function __construct()
     {
@@ -140,6 +144,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPlainPassword(?string $plainPassword): self
     {
         $this->plainPassword = $plainPassword;
+        if ($plainPassword) {
+            // Mark entity as changed without nullifying the password
+            $this->updatedAt = new \DateTime();
+        }
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTime
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTime $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
         return $this;
     }
 

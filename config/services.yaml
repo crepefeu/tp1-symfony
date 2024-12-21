@@ -18,17 +18,10 @@ services:
             - "../src/Entity/"
             - "../src/Kernel.php"
 
-    OpenAI\Client:
-        factory: ["OpenAI", "client"]
-        arguments:
-            $apiKey: "%env(OPENAI_API_KEY)%"
-
     App\MessageHandler\SendReservationEmailNotificationHandler:
         arguments:
             $adminEmail: "%app.admin_email%"
 
     App\EventSubscriber\HashPasswordSubscriber:
-        tags: ['doctrine.event_subscriber']
-
-  # add more service definitions when explicit configuration is needed
-  # please note that last definitions always *replace* previous ones
+        tags:
+            - { name: doctrine.event_subscriber, connection: default }

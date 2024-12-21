@@ -53,8 +53,11 @@ class ResetPasswordController extends AbstractController
     public function reset(Request $request, UserPasswordHasherInterface $passwordHasher, string $token = null): Response
     {
         if ($token) {
+            // Store the token in session and maintain the session
             $this->storeTokenInSession($token);
-            return $this->redirectToRoute('app_reset_password');
+            
+            // Redirect while maintaining the session
+            return $this->redirectToRoute('app_reset_password', [], Response::HTTP_SEE_OTHER);
         }
 
         $token = $this->getTokenFromSession();
@@ -80,14 +83,20 @@ class ResetPasswordController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->resetPasswordHelper->removeResetRequest($token);
 
-            // Set plainPassword and ensure entity is persisted
-            $user->setPlainPassword($form->get('plainPassword')->getData());
-            $this->entityManager->persist($user); // Add this line
+            // Set plain password
+            $plainPassword = $form->get('plainPassword')->getData();
+            $user->setPlainPassword($plainPassword);
+
+            // Force Doctrine to detect changes
+            $this->entityManager->persist($user);
+            // Flush changes - this will trigger the subscriber
             $this->entityManager->flush();
 
             $this->cleanSessionAfterReset();
-
-            return $this->redirectToRoute('app_login');
+            
+            $this->addFlash('success', 'Your password has been successfully reset. You can now log in with your new password.');
+            
+            return $this->redirectToRoute('app_login', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('reset_password/reset.html.twig', [
@@ -126,22 +135,23 @@ class ResetPasswordController extends AbstractController
             return $this->redirectToRoute('app_forgot_password_request');
         }
 
-        $email = (new TemplatedEmail())
-            ->from(new Address('admin@example.com', 'Reset Password Bot'))
-            ->to($user->getEmail())
-            ->subject('Your password reset request')
-            ->htmlTemplate('reset_password/email.html.twig')
-            ->context([
-                'resetToken' => $resetToken,
-            ])
-            ->replyTo('noreply@example.com')
-            ->priority(Email::PRIORITY_HIGH);
-
         try {
+            $email = (new TemplatedEmail())
+                ->from(new Address('admin@example.com', 'Reset Password Bot'))
+                ->to($user->getEmail())
+                ->subject('Your password reset request')
+                ->htmlTemplate('reset_password/email.html.twig')
+                ->context([
+                    'resetToken' => $resetToken,
+                ])
+                ->replyTo('noreply@example.com')
+                ->priority(Email::PRIORITY_HIGH);
+
+            dump('About to send email to: ' . $user->getEmail());
             $mailer->send($email);
-            dump('Email sent');
+            dump('Email sent successfully');
         } catch (\Exception $e) {
-            dump($e);
+            dump('Email sending failed: ' . $e->getMessage());
             $this->addFlash('reset_password_error', 'There was a problem sending the password reset email - ' . $e->getMessage());
             return $this->redirectToRoute('app_forgot_password_request');
         }
