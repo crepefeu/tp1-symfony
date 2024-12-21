@@ -16,24 +16,45 @@ class DiscountType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $commonClass = 'mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500';
+        
         $builder
             ->add('code', TextType::class, [
                 'label' => 'Code',
-                'attr' => ['class' => 'form-control']
+                'attr' => [
+                    'class' => $commonClass,
+                    'placeholder' => 'SUMMER2024'
+                ]
             ])
             ->add('discount', NumberType::class, [
-                'label' => 'Discount (%)',
-                'attr' => ['class' => 'form-control']
+                'label' => 'Réduction (%)',
+                'attr' => [
+                    'class' => $commonClass,
+                    'placeholder' => '10',
+                    'min' => 0,
+                    'max' => 100
+                ]
             ])
-            ->add('validUntil', DateType::class, [
-                'label' => 'Valid Until',
+            ->add('startDate', DateType::class, [
+                'label' => 'Date de début',
                 'widget' => 'single_text',
-                'attr' => ['class' => 'form-control']
+                'attr' => [
+                    'class' => $commonClass
+                ]
+            ])
+            ->add('endDate', DateType::class, [
+                'label' => 'Date de fin',
+                'widget' => 'single_text',
+                'attr' => [
+                    'class' => $commonClass
+                ]
             ])
             ->add('restaurant', EntityType::class, [
                 'class' => Restaurant::class,
                 'choice_label' => 'name',
-                'attr' => ['class' => 'form-control']
+                'attr' => [
+                    'class' => $commonClass
+                ]
             ])
         ;
     }

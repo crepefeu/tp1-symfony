@@ -12,11 +12,11 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/admin/discount', name: 'app_admin_discount_')]
+#[Route('/admin/discount')]
 #[IsGranted('ROLE_ADMIN')]
 class AdminDiscountController extends AbstractController
 {
-    #[Route('/', name: 'index', methods: ['GET'])]
+    #[Route('/', name: 'app_admin_discount_index', methods: ['GET'])]
     public function index(DiscountRepository $discountRepository): Response
     {
         return $this->render('admin/discount/index.html.twig', [
@@ -24,7 +24,7 @@ class AdminDiscountController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
+    #[Route('/new', name: 'app_admin_discount_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $discount = new Discount();
@@ -45,7 +45,7 @@ class AdminDiscountController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_admin_discount_show', methods: ['GET'])]
     public function show(Discount $discount): Response
     {
         return $this->render('admin/discount/show.html.twig', [
@@ -53,7 +53,7 @@ class AdminDiscountController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_admin_discount_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Discount $discount, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(DiscountType::class, $discount);
@@ -72,7 +72,7 @@ class AdminDiscountController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_admin_discount_delete', methods: ['POST'])]
     public function delete(Request $request, Discount $discount, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$discount->getId(), $request->request->get('_token'))) {
