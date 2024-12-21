@@ -5,6 +5,7 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     app.admin_email: "admin@restaurant.com"
+    locale: fr
 
 services:
     _defaults:
