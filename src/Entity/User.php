@@ -58,7 +58,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'user')]
     private Collection $reservations;
 
-    #[ORM\Column(nullable: true)]
+    /**
+     * @var string|null
+     */
     private ?string $plainPassword = null;
 
     #[ORM\Column(nullable: true)]
