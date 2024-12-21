@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\MenuRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: MenuRepository::class)]
 class Menu
@@ -32,6 +34,14 @@ class Menu
 
     #[ORM\Column]
     private ?bool $isActive = null;
+
+    #[ORM\ManyToMany(targetEntity: MenuItem::class)]
+    private Collection $menuItems;
+
+    public function __construct()
+    {
+        $this->menuItems = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -106,6 +116,30 @@ class Menu
     public function setActive(bool $isActive): static
     {
         $this->isActive = $isActive;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MenuItem>
+     */
+    public function getMenuItems(): Collection
+    {
+        return $this->menuItems;
+    }
+
+    public function addMenuItem(MenuItem $menuItem): self
+    {
+        if (!$this->menuItems->contains($menuItem)) {
+            $this->menuItems->add($menuItem);
+        }
+
+        return $this;
+    }
+
+    public function removeMenuItem(MenuItem $menuItem): self
+    {
+        $this->menuItems->removeElement($menuItem);
 
         return $this;
     }
