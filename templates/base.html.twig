@@ -22,7 +22,7 @@
 	<body class="bg-white">
 		{% include 'navbar.html.twig' %}
 		{% for message in app.flashes('success') %}
-			<div class="alert alert-success">
+			<div class="w-fit bg-green-100 ring-green-600 text-green-700 rounded-md p-4 mb-4">
 				{{ message }}
 			</div>
 		{% endfor %}
