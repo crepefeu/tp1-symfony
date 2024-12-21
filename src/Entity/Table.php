@@ -35,7 +35,7 @@ class Table
     /**
      * @var Collection<int, Reservation>
      */
-    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'restaurantTable')]
+    #[ORM\OneToMany(mappedBy: 'restaurantTable', targetEntity: Reservation::class)]
     private Collection $reservations;
 
     public function __construct()

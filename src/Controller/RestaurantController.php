@@ -13,6 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\RestaurantRepository;
 use App\Enum\ReservationStatus;
 use App\Service\LoyaltyService;
+use App\Repository\DiscountRepository;
 
 #[Route('/restaurant')]
 class RestaurantController extends AbstractController
@@ -84,7 +85,7 @@ class RestaurantController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_restaurant_show', methods: ['GET', 'POST'])]
-    public function show(Request $request, RestaurantRepository $restaurantRepository, int $id, EntityManagerInterface $entityManager): Response
+    public function show(Request $request, RestaurantRepository $restaurantRepository, int $id, EntityManagerInterface $entityManager, DiscountRepository $discountRepository): Response
     {
         $restaurant = $restaurantRepository->find($id);
         
@@ -117,9 +118,24 @@ class RestaurantController extends AbstractController
                 ]);
             }
 
+            // Handle discount code
+            $discountCode = $form->get('discountCode')->getData() ?? 
+                           $request->request->get('form')['discountCode'] ?? null;
+            
+            if ($discountCode) {
+                $discount = $discountRepository->findOneBy([
+                    'code' => $discountCode,
+                    'restaurant' => $restaurant
+                ]);
+                
+                if ($discount && $discount->getEndDate() >= new \DateTime()) {
+                    $reservation->setDiscount($discount);
+                }
+            }
+
+            $reservation->setCreatedAt(new \DateTime());
             $reservation->setStatus(ReservationStatus::PENDING);
             
-            // Set the user if logged in
             if ($this->getUser()) {
                 $reservation->setUser($this->getUser());
             }

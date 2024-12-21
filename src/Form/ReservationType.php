@@ -20,13 +20,40 @@ class ReservationType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $restaurant = $options['restaurant'] ?? null;
+        
+        // Add restaurant field as disabled but visible
+        $builder->add('restaurant', EntityType::class, [
+            'class' => Restaurant::class,
+            'choice_label' => 'name',
+            'data' => $restaurant,
+            'disabled' => true,
+            'attr' => [
+                'class' => 'block w-full px-4 py-2.5 bg-gray-100 border border-gray-300 rounded-lg shadow-sm'
+            ]
+        ]);
+
+        // Add table field with restaurant-specific query
+        $builder->add('restaurantTable', EntityType::class, [
+            'class' => Table::class,
+            'choice_label' => function(Table $table) {
+                return sprintf('Table %d (%d personnes)', $table->getNumber(), $table->getCapacity());
+            },
+            'query_builder' => function (EntityRepository $er) use ($restaurant) {
+                return $er->createQueryBuilder('t')
+                    ->where('t.restaurant = :restaurant')
+                    ->andWhere('t.active = true')
+                    ->setParameter('restaurant', $restaurant)
+                    ->orderBy('t.number', 'ASC');
+            },
+            'placeholder' => 'Choisir une table',
+            'required' => true,
+            'attr' => [
+                'class' => 'block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm'
+            ]
+        ]);
+
         $builder
-            ->add('restaurant', EntityType::class, [
-                'class' => Restaurant::class,
-                'choice_label' => 'name',
-                'disabled' => !$options['is_admin'], // Only enabled for admin
-                'required' => true,
-            ])
             ->add('customerFirstName', TextType::class, [
                 'label' => 'Prénom',
             ])
@@ -46,26 +73,18 @@ class ReservationType extends AbstractType
             ->add('numberOfGuests', IntegerType::class, [
                 'label' => 'Nombre de personnes',
             ])
-            ->add('restaurantTable', EntityType::class, [
-                'class' => Table::class,
-                'choice_label' => function(Table $table) {
-                    return sprintf('Table %d (%d personnes)', $table->getNumber(), $table->getCapacity());
-                },
-                'query_builder' => function (EntityRepository $er) use ($options) {
-                    return $er->createQueryBuilder('t')
-                        ->where('t.restaurant = :restaurant')
-                        ->andWhere('t.active = true')
-                        ->setParameter('restaurant', $options['restaurant'])
-                        ->orderBy('t.number', 'ASC');
-                },
-                'placeholder' => 'Choisir une table',
-                'required' => true,
-            ])
             ->add('specialRequests', TextareaType::class, [
                 'label' => 'Demandes spéciales',
                 'required' => false,
             ])
-        ;
+            ->add('discountCode', TextType::class, [
+                'mapped' => false,
+                'required' => false,
+                'label' => 'Code promo',
+                'attr' => [
+                    'placeholder' => 'Entrez votre code promo'
+                ]
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -75,5 +94,7 @@ class ReservationType extends AbstractType
             'restaurant' => null,
             'is_admin' => false,
         ]);
+
+        $resolver->setAllowedTypes('restaurant', [Restaurant::class, 'null']);
     }
 }

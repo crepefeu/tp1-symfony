@@ -9,7 +9,30 @@
             <div class="px-6 py-8 sm:p-10">
                 <h1 class="text-2xl font-bold text-gray-900 text-center mb-8">Nouvelle réservation</h1>
 
-                {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+                {% for message in app.flashes('error') %}
+                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+
+                {% for message in app.flashes('success') %}
+                    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+
+                {{ form_start(form, {
+                    'method': 'POST',
+                    'attr': {
+                        'class': 'space-y-6',
+                        'id': 'reservation-form',
+                        'novalidate': 'novalidate'
+                    }
+                }) }}
+                
+                <input type="hidden" name="restaurant" value="{{ restaurant.id }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('reservation_form') }}">
+
                     <div class="space-y-6">
                         {% if form.restaurant is defined %}
                             <div>
@@ -111,10 +134,25 @@
                                 }
                             }) }}
                         </div>
+
+                        <div class="space-y-1">
+                            {{ form_label(form.discountCode, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
+                            <div class="flex space-x-2">
+                                {{ form_widget(form.discountCode) }}
+                                <button type="button" 
+                                        id="validate-discount"
+                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Appliquer
+                                </button>
+                            </div>
+                            <div id="discount-message" class="mt-2 text-sm"></div>
+                            {{ form_errors(form.discountCode) }}
+                        </div>
                     </div>
 
                     <div class="mt-8">
-                        <button type="submit" class="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150">
+                        <button type="submit" 
+                                class="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
@@ -126,4 +164,50 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const validateButton = document.getElementById('validate-discount');
+    if (!validateButton) return;
+
+    validateButton.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        const codeInput = document.getElementById('{{ form.discountCode.vars.id }}');
+        const messageDiv = document.getElementById('discount-message');
+
+        if (!codeInput.value) {
+            messageDiv.innerHTML = '<p class="text-red-600">Veuillez entrer un code promo</p>';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('code', codeInput.value);
+        formData.append('restaurantId', '{{ restaurant.id }}');
+        formData.append('_token', document.querySelector('input[name="_token"]').value);
+
+        try {
+            const response = await fetch('{{ path('app_reservation_validate_discount') }}', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            messageDiv.innerHTML = data.valid 
+                ? `<p class="text-green-600">${data.discount.message}</p>`
+                : `<p class="text-red-600">${data.message}</p>`;
+
+            if (data.valid) {
+                codeInput.readOnly = true; // Use readOnly instead of disabled
+                this.disabled = true;
+            }
+        } catch (error) {
+            messageDiv.innerHTML = '<p class="text-red-600">Erreur lors de la validation du code</p>';
+        }
+    });
+});
+</script>
 {% endblock %}

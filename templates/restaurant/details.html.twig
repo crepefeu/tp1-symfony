@@ -105,7 +105,14 @@
 						{# Reservation Form #}
 						<div class="mt-8">
 							<h3 class="text-lg font-semibold mb-6">Réserver une table</h3>
-							{{ form_start(reservation_form, {'attr': {'class': 'space-y-6'}}) }}
+							{{ form_start(reservation_form, {
+								'attr': {
+									'class': 'space-y-6',
+									'id': 'reservation-form',
+									'novalidate': 'novalidate'
+								}
+							}) }}
+							<input type="hidden" name="_token" value="{{ csrf_token('reservation_form') }}">
 								{# Hide the restaurant field #}
 								<div class="hidden">
 									{{ form_widget(reservation_form.restaurant) }}
@@ -202,15 +209,34 @@
 											}
 										}) }}
 									</div>
-								</div>
 
-								<button type="submit" 
-										class="w-full mt-6 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150">
-									<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-									</svg>
-									Réserver maintenant
-								</button>
+									<div class="space-y-1">
+										{{ form_label(reservation_form.discountCode, 'Code promo', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
+										<div class="flex space-x-2">
+											{{ form_widget(reservation_form.discountCode, {
+												'attr': {
+													'class': 'block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm',
+													'placeholder': 'Entrez votre code promo',
+													'name': 'form[discountCode]'
+												}
+											}) }}
+											<button type="button" 
+													id="validate-discount"
+													class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+												Appliquer
+											</button>
+										</div>
+										<div id="discount-message" class="mt-2 text-sm"></div>
+									</div>
+
+									<button type="submit" 
+											class="w-full mt-6 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150">
+										<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+										</svg>
+										Réserver maintenant
+									</button>
+								</div>
 							{{ form_end(reservation_form) }}
 						</div>
 					</div>
@@ -218,4 +244,61 @@
 			</div>
 		</div>
 	</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('reservation-form');
+    const validateButton = document.getElementById('validate-discount');
+    const csrfToken = document.querySelector('input[name="_token"]').value;
+
+    validateButton.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        const codeInput = document.getElementById('{{ reservation_form.discountCode.vars.id }}');
+        const messageDiv = document.getElementById('discount-message');
+        const code = codeInput.value.trim();
+
+        if (!code) {
+            messageDiv.innerHTML = '<p class="text-red-600">Veuillez entrer un code promo</p>';
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('code', code);
+            formData.append('restaurantId', '{{ restaurant.id }}');
+            formData.append('_token', csrfToken);
+
+            const response = await fetch('{{ path('app_reservation_validate_discount') }}', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.valid) {
+                messageDiv.innerHTML = `<p class="text-green-600">${data.discount.message}</p>`;
+                codeInput.readOnly = true;
+                validateButton.disabled = true;
+
+                // Ensure the code is submitted with the form
+                if (!document.querySelector('input[name="form[discountCode]"]')) {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'form[discountCode]';
+                    hiddenInput.value = code;
+                    form.appendChild(hiddenInput);
+                }
+            } else {
+                messageDiv.innerHTML = `<p class="text-red-600">${data.message}</p>`;
+            }
+        } catch (error) {
+            messageDiv.innerHTML = '<p class="text-red-600">Erreur lors de la validation du code</p>';
+        }
+    });
+});
+</script>
 {% endblock %}

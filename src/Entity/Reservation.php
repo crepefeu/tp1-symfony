@@ -30,7 +30,7 @@ class Reservation
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $specialRequests = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(targetEntity: Table::class, inversedBy: 'reservations')]
     #[ORM\JoinColumn(nullable: true)]
     private ?Table $restaurantTable = null;
 
@@ -53,6 +53,9 @@ class Reservation
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'reservations')]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id')]
     private ?User $user = null;
+
+    #[ORM\ManyToOne]
+    private ?Discount $discount = null;
 
     public function __construct()
     {
@@ -206,6 +209,17 @@ class Reservation
     {
         $this->user = $user;
 
+        return $this;
+    }
+
+    public function getDiscount(): ?Discount
+    {
+        return $this->discount;
+    }
+
+    public function setDiscount(?Discount $discount): static
+    {
+        $this->discount = $discount;
         return $this;
     }
 }
