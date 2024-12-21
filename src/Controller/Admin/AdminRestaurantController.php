@@ -28,7 +28,7 @@ class AdminRestaurantController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $restaurant = new Restaurant();
-        $form = $this->createForm(RestaurantType::class, $restaurant);
+        $form = $this->createForm(RestaurantType::class, $restaurant, ['include_categories' => true]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -36,7 +36,7 @@ class AdminRestaurantController extends AbstractController
             $entityManager->flush();
 
             $this->addFlash('success', 'Restaurant créé avec succès');
-            return $this->redirectToRoute('admin_restaurant_index');
+            return $this->redirectToRoute('app_admin_restaurant_index');
         }
 
         return $this->render('admin/restaurant/new.html.twig', [
@@ -56,14 +56,14 @@ class AdminRestaurantController extends AbstractController
     #[Route('/{id}/edit', name: 'app_admin_restaurant_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Restaurant $restaurant, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createForm(RestaurantType::class, $restaurant);
+        $form = $this->createForm(RestaurantType::class, $restaurant, ['include_categories' => false]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
             $this->addFlash('success', 'Restaurant modifié avec succès');
-            return $this->redirectToRoute('admin_restaurant_index');
+            return $this->redirectToRoute('app_admin_restaurant_index');
         }
 
         return $this->render('admin/restaurant/edit.html.twig', [
@@ -81,6 +81,6 @@ class AdminRestaurantController extends AbstractController
             $this->addFlash('success', 'Restaurant supprimé avec succès');
         }
 
-        return $this->redirectToRoute('admin_restaurant_index');
+        return $this->redirectToRoute('app_admin_restaurant_index');
     }
 }

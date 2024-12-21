@@ -21,8 +21,8 @@ class DiscountType extends AbstractType
                 'label' => 'Code',
                 'attr' => ['class' => 'form-control']
             ])
-            ->add('amount', NumberType::class, [
-                'label' => 'Amount (%)',
+            ->add('discount', NumberType::class, [
+                'label' => 'Discount (%)',
                 'attr' => ['class' => 'form-control']
             ])
             ->add('validUntil', DateType::class, [

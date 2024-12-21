@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ReservationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Enum\ReservationStatus;
 
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
 class Reservation
@@ -23,14 +24,14 @@ class Reservation
     #[ORM\Column]
     private ?int $numberOfGuests = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $status = null;
+    #[ORM\Column(length: 50, nullable: false, enumType: ReservationStatus::class)]
+    private ReservationStatus $status = ReservationStatus::PENDING;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $specialRequests = null;
 
-    #[ORM\ManyToOne(inversedBy: 'reservations')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Table $restaurantTable = null;
 
     #[ORM\ManyToOne(inversedBy: 'reservations')]
@@ -52,6 +53,12 @@ class Reservation
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'reservations')]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id')]
     private ?User $user = null;
+
+    public function __construct()
+    {
+        $this->status = ReservationStatus::PENDING;
+        $this->createdAt = new \DateTime();
+    }
 
     public function getId(): ?int
     {
@@ -82,12 +89,12 @@ class Reservation
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): ReservationStatus
     {
         return $this->status;
     }
 
-    public function setStatus(?string $status): static
+    public function setStatus(ReservationStatus $status): static
     {
         $this->status = $status;
 

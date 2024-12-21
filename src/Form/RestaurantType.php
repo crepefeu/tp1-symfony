@@ -16,32 +16,30 @@ class RestaurantType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('name', TextType::class, [
-                'label' => 'Nom du restaurant'
-            ])
+            ->add('name', TextType::class)
             ->add('description', TextareaType::class, [
-                'label' => 'Description'
+                'required' => false,
             ])
-            ->add('address', TextType::class, [
-                'label' => 'Adresse'
-            ])
-            ->add('phone', TextType::class, [
-                'label' => 'Téléphone'
-            ])
-            ->add('categories', EntityType::class, [
+            ->add('address', TextType::class)
+            ->add('phone', TextType::class)
+        ;
+
+        if ($options['include_categories']) {
+            $builder->add('categories', EntityType::class, [
                 'class' => Category::class,
                 'choice_label' => 'name',
                 'multiple' => true,
                 'expanded' => true,
-                'label' => 'Catégories'
-            ])
-        ;
+                'required' => false,
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Restaurant::class,
+            'include_categories' => false,
         ]);
     }
 }

@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Form\ReservationType;
+use App\Entity\Restaurant;
+use App\Enum\ReservationStatus;
 
 #[Route('/reservation')]
 class ReservationController extends AbstractController
@@ -22,11 +24,41 @@ class ReservationController extends AbstractController
     #[Route('/new', name: 'app_reservation_new', methods: ['GET', 'POST'])]
     public function new(Request $request): Response
     {
+        $restaurantId = $request->query->get('restaurant');
+        $restaurant = $this->entityManager->getRepository(Restaurant::class)->find($restaurantId);
+        
+        if (!$restaurant) {
+            throw $this->createNotFoundException('Restaurant not found');
+        }
+
         $reservation = new Reservation();
-        $form = $this->createForm(ReservationType::class, $reservation);
+        $reservation->setRestaurant($restaurant);
+        
+        $form = $this->createForm(ReservationType::class, $reservation, [
+            'restaurant' => $restaurant,
+        ]);
+        
         $form->handleRequest($request);
     
         if ($form->isSubmitted() && $form->isValid()) {
+            // Check table capacity
+            $selectedTable = $reservation->getRestaurantTable();
+            $numberOfGuests = $reservation->getNumberOfGuests();
+            
+            if ($selectedTable && $numberOfGuests > $selectedTable->getCapacity()) {
+                $this->addFlash('error', sprintf(
+                    'Le nombre de personnes dépasse la capacité de la table sélectionnée (maximum %d personnes)',
+                    $selectedTable->getCapacity()
+                ));
+                return $this->render('reservation/new.html.twig', [
+                    'form' => $form->createView(),
+                    'restaurant' => $restaurant,
+                ]);
+            }
+
+            $reservation->setCreatedAt(new \DateTime());
+            $reservation->setStatus(ReservationStatus::PENDING);
+            
             if ($this->getUser()) {
                 $reservation->setUser($this->getUser());
             }
@@ -44,6 +76,7 @@ class ReservationController extends AbstractController
     
         return $this->render('reservation/new.html.twig', [
             'form' => $form->createView(),
+            'restaurant' => $restaurant,
         ]);
     }
 

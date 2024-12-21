@@ -20,8 +20,10 @@ class UserType extends AbstractType
             ])
             ->add('plainPassword', PasswordType::class, [
                 'label' => 'Mot de passe',
-                'required' => false,
-                'mapped' => false, // Change this to false
+                'required' => true,
+                'mapped' => true,
+                // Only require password for new users
+                'required' => !$options['is_edit']
             ])
             ->add('firstName', TextType::class, [
                 'label' => 'Prénom'
@@ -40,6 +42,7 @@ class UserType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => User::class,
+            'is_edit' => false,
         ]);
     }
 }

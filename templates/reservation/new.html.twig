@@ -3,25 +3,121 @@
 {% block title %}Nouvelle réservation{% endblock %}
 
 {% block body %}
-<div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 bg-white border-b border-gray-200">
-                <h1 class="text-2xl font-bold mb-6">Nouvelle réservation</h1>
+<div class="min-h-screen bg-gray-100 py-12">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="px-6 py-8 sm:p-10">
+                <h1 class="text-2xl font-bold text-gray-900 text-center mb-8">Nouvelle réservation</h1>
 
-                {{ form_start(form, {'attr': {'class': 'space-y-4'}}) }}
-                    <div class="grid grid-cols-2 gap-4">
-                        {{ form_row(form.dateTime) }}
-                        {{ form_row(form.numberOfGuests) }}
-                        {{ form_row(form.customerFirstName) }}
-                        {{ form_row(form.customerLastName) }}
-                        {{ form_row(form.customerEmail) }}
-                        {{ form_row(form.customerPhone) }}
-                        {{ form_row(form.specialRequests) }}
+                {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+                    <div class="space-y-6">
+                        {% if form.restaurant is defined %}
+                            <div>
+                                {{ form_label(form.restaurant, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                                {{ form_widget(form.restaurant, {
+                                    'attr': {
+                                        'class': 'block w-full px-4 py-2.5 bg-white border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm rounded-lg shadow-sm'
+                                    }
+                                }) }}
+                            </div>
+                        {% endif %}
+
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div>
+                                {{ form_label(form.customerFirstName, 'Prénom', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                                {{ form_widget(form.customerFirstName, {
+                                    'attr': {
+                                        'class': 'block w-full px-4 py-2.5 bg-white border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm rounded-lg shadow-sm',
+                                        'placeholder': 'Votre prénom',
+                                        'value': app.user ? app.user.firstName : ''
+                                    }
+                                }) }}
+                            </div>
+
+                            <div>
+                                {{ form_label(form.customerLastName, 'Nom', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                                {{ form_widget(form.customerLastName, {
+                                    'attr': {
+                                        'class': 'block w-full px-4 py-2.5 bg-white border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm rounded-lg shadow-sm',
+                                        'placeholder': 'Votre nom',
+                                        'value': app.user ? app.user.lastName : ''
+                                    }
+                                }) }}
+                            </div>
+                        </div>
+
+                        <div>
+                            {{ form_label(form.customerEmail, 'Email', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                            {{ form_widget(form.customerEmail, {
+                                'attr': {
+                                    'class': 'block w-full px-4 py-2.5 bg-white border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm rounded-lg shadow-sm',
+                                    'placeholder': 'votre@email.com',
+                                    'value': app.user ? app.user.email : ''
+                                }
+                            }) }}
+                        </div>
+
+                        <div>
+                            {{ form_label(form.customerPhone, 'Téléphone', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                            {{ form_widget(form.customerPhone, {
+                                'attr': {
+                                    'class': 'block w-full px-4 py-2.5 bg-white border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm rounded-lg shadow-sm',
+                                    'placeholder': '06 12 34 56 78',
+                                    'value': app.user ? app.user.phone : ''
+                                }
+                            }) }}
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div>
+                                {{ form_label(form.dateTime, 'Date et heure', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                                {{ form_widget(form.dateTime, {
+                                    'attr': {
+                                        'class': 'block w-full px-4 py-2.5 bg-white border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm rounded-lg shadow-sm'
+                                    }
+                                }) }}
+                            </div>
+
+                            <div>
+                                {{ form_label(form.numberOfGuests, 'Nombre de personnes', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                                {{ form_widget(form.numberOfGuests, {
+                                    'attr': {
+                                        'class': 'block w-full px-4 py-2.5 bg-white border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm rounded-lg shadow-sm',
+                                        'min': 1,
+                                        'max': 10
+                                    }
+                                }) }}
+                            </div>
+                        </div>
+
+                        {% if form.restaurantTable is defined %}
+                            <div>
+                                {{ form_label(form.restaurantTable, 'Table', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                                {{ form_widget(form.restaurantTable, {
+                                    'attr': {
+                                        'class': 'block w-full px-4 py-2.5 bg-white border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm rounded-lg shadow-sm'
+                                    }
+                                }) }}
+                            </div>
+                        {% endif %}
+
+                        <div>
+                            {{ form_label(form.specialRequests, 'Demandes spéciales', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                            {{ form_widget(form.specialRequests, {
+                                'attr': {
+                                    'class': 'block w-full px-4 py-2.5 bg-white border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm rounded-lg shadow-sm',
+                                    'rows': 3,
+                                    'placeholder': 'Allergies, préférences alimentaires, occasion spéciale...'
+                                }
+                            }) }}
+                        </div>
                     </div>
 
-                    <div class="mt-6">
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    <div class="mt-8">
+                        <button type="submit" class="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
                             Confirmer la réservation
                         </button>
                     </div>

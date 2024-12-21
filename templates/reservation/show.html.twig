@@ -3,46 +3,69 @@
 {% block title %}Détails de la réservation{% endblock %}
 
 {% block body %}
-<div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 bg-white border-b border-gray-200">
-                <h1 class="text-2xl font-bold mb-6">Détails de la réservation</h1>
+<div class="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
+    <div class="relative py-3 sm:max-w-3xl sm:mx-auto">
+        <div class="relative px-4 py-10 bg-white mx-8 md:mx-0 shadow rounded-3xl sm:p-10">
+            <div class="max-w-2xl mx-auto">
+                <div class="divide-y divide-gray-200">
+                    <div class="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
+                        <h1 class="text-2xl font-bold text-center mb-8">Détails de la réservation</h1>
 
-                {% for message in app.flashes('success') %}
-                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                        {{ message }}
-                    </div>
-                {% endfor %}
+                        {% for message in app.flashes('success') %}
+                            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <h2 class="text-lg font-semibold mb-2">Informations de réservation</h2>
-                        <p><strong>Restaurant :</strong> {{ reservation.restaurant.name }}</p>
-                        <p><strong>Date :</strong> {{ reservation.dateTime|date('d/m/Y H:i') }}</p>
-                        <p><strong>Nombre de personnes :</strong> {{ reservation.numberOfGuests }}</p>
-                        <p><strong>Statut :</strong> {{ reservation.status }}</p>
-                    </div>
-                    
-                    <div>
-                        <h2 class="text-lg font-semibold mb-2">Informations client</h2>
-                        <p><strong>Nom :</strong> {{ reservation.customerFirstName }} {{ reservation.customerLastName }}</p>
-                        <p><strong>Email :</strong> {{ reservation.customerEmail }}</p>
-                        <p><strong>Téléphone :</strong> {{ reservation.customerPhone }}</p>
-                    </div>
-                </div>
+                        <div class="space-y-6">
+                            <div class="bg-gray-50 rounded-lg p-6 space-y-4">
+                                <h2 class="text-lg font-semibold text-gray-900">Informations de réservation</h2>
+                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                    <p><span class="font-medium text-gray-500">Restaurant :</span> {{ reservation.restaurant.name }}</p>
+                                    <p><span class="font-medium text-gray-500">Date :</span> {{ reservation.dateTime|date('d/m/Y H:i') }}</p>
+                                    <p><span class="font-medium text-gray-500">Nombre de personnes :</span> {{ reservation.numberOfGuests }}</p>
+                                    <p><span class="font-medium text-gray-500">Statut :</span> 
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                            {% if reservation.status == constant('App\\Enum\\ReservationStatus::PENDING') %}
+                                                bg-yellow-100 text-yellow-800
+                                            {% elseif reservation.status == constant('App\\Enum\\ReservationStatus::CONFIRMED') %}
+                                                bg-green-100 text-green-800
+                                            {% elseif reservation.status == constant('App\\Enum\\ReservationStatus::CANCELLED') %}
+                                                bg-red-100 text-red-800
+                                            {% else %}
+                                                bg-gray-100 text-gray-800
+                                            {% endif %}
+                                        ">
+                                            {{ reservation.status.label }}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
 
-                {% if reservation.specialRequests %}
-                    <div class="mt-4">
-                        <h2 class="text-lg font-semibold mb-2">Demandes spéciales</h2>
-                        <p>{{ reservation.specialRequests }}</p>
-                    </div>
-                {% endif %}
+                            <div class="bg-gray-50 rounded-lg p-6 space-y-4">
+                                <h2 class="text-lg font-semibold text-gray-900">Informations client</h2>
+                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                    <p><span class="font-medium text-gray-500">Nom :</span> {{ reservation.customerFirstName }} {{ reservation.customerLastName }}</p>
+                                    <p><span class="font-medium text-gray-500">Email :</span> {{ reservation.customerEmail }}</p>
+                                    <p><span class="font-medium text-gray-500">Téléphone :</span> {{ reservation.customerPhone }}</p>
+                                </div>
+                            </div>
 
-                <div class="mt-6">
-                    <a href="{{ path('app_home') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                        Retour à l'accueil
-                    </a>
+                            {% if reservation.specialRequests %}
+                                <div class="bg-gray-50 rounded-lg p-6 space-y-4">
+                                    <h2 class="text-lg font-semibold text-gray-900">Demandes spéciales</h2>
+                                    <p class="text-sm">{{ reservation.specialRequests }}</p>
+                                </div>
+                            {% endif %}
+
+                            <div class="flex justify-center pt-6">
+                                <a href="{{ path('app_home') }}" 
+                                   class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Retour à l'accueil
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

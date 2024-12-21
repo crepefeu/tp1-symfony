@@ -1,0 +1,107 @@
+{% extends 'admin/shared/_index_layout.html.twig' %}
+
+{% block title %}Gestion des réservations{% endblock %}
+
+{% block index_title %}Réservations{% endblock %}
+{% block index_description %}Gérez les réservations de la plateforme{% endblock %}
+
+{% block content %}
+    <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Restaurant</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Table</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for reservation in reservations %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <img class="h-10 w-10 rounded-full object-cover" 
+                                         src="{{ reservation.restaurant.imageUrl|default('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4') }}" 
+                                         alt="{{ reservation.restaurant.name }}">
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">{{ reservation.restaurant.name }}</div>
+                                    <div class="text-sm text-gray-500">{{ reservation.numberOfGuests }} personnes</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900">
+                                {{ reservation.customerFirstName }} {{ reservation.customerLastName }}
+                                {% if reservation.user %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        Compte lié
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <div class="text-sm text-gray-500">{{ reservation.customerEmail }}</div>
+                            <div class="text-sm text-gray-500">{{ reservation.customerPhone }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ reservation.dateTime|date('d/m/Y H:i') }}</div>
+                            <div class="text-sm text-gray-500">
+                                Table n°{{ reservation.restaurantTable.number }}
+                                <span class="text-xs text-gray-400">({{ reservation.restaurantTable.capacity }} places)</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                {% if reservation.status == constant('App\\Enum\\ReservationStatus::PENDING') %}
+                                    bg-yellow-100 text-yellow-800
+                                {% elseif reservation.status == constant('App\\Enum\\ReservationStatus::CONFIRMED') %}
+                                    bg-green-100 text-green-800
+                                {% elseif reservation.status == constant('App\\Enum\\ReservationStatus::CANCELLED') %}
+                                    bg-red-100 text-red-800
+                                {% else %}
+                                    bg-gray-100 text-gray-800
+                                {% endif %}">
+                                {{ reservation.status.label }}
+                            </span>
+                            {% if reservation.specialRequests %}
+                                <p class="mt-2 text-sm text-gray-500 italic">
+                                    "{{ reservation.specialRequests|slice(0, 50) }}{% if reservation.specialRequests|length > 50 %}...{% endif %}"
+                                </p>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex justify-end space-x-3">
+                                {% if reservation.status == constant('App\\Enum\\ReservationStatus::PENDING') %}
+                                    <form method="post" action="{{ path('app_admin_reservation_confirm', {'id': reservation.id}) }}" class="inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('confirm' ~ reservation.id) }}">
+                                        <button type="submit" class="text-green-600 hover:text-green-900">Confirmer</button>
+                                    </form>
+                                {% endif %}
+                                <a href="{{ path('app_admin_reservation_show', {'id': reservation.id}) }}" 
+                                   class="text-indigo-600 hover:text-indigo-900">
+                                    Détails
+                                </a>
+                                {% if reservation.status != constant('App\\Enum\\ReservationStatus::CANCELLED') %}
+                                    <form method="post" action="{{ path('app_admin_reservation_cancel', {'id': reservation.id}) }}" 
+                                          class="inline" 
+                                          onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ reservation.id) }}">
+                                        <button type="submit" class="text-red-600 hover:text-red-900">Annuler</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                            Aucune réservation trouvée
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

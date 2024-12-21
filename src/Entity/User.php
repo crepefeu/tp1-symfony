@@ -46,10 +46,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?bool $isVerified = false;
 
-    #[ORM\Column]
+    #[ORM\Column(options: ["default" => 0])]
     private int $loyaltyPoints = 0;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: LoyaltyTransaction::class)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: LoyaltyTransaction::class, cascade: ['remove'])]
     private Collection $loyaltyTransactions;
 
     /**
@@ -227,7 +227,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setLoyaltyPoints(int $points): static
     {
-        $this->loyaltyPoints = $points;
+        $this->loyaltyPoints = max(0, $points);
+        return $this;
+    }
+
+    public function addLoyaltyPoints(int $points): static
+    {
+        $this->loyaltyPoints += max(0, $points);
+        return $this;
+    }
+
+    public function removeLoyaltyPoints(int $points): static
+    {
+        $this->loyaltyPoints = max(0, $this->loyaltyPoints - $points);
         return $this;
     }
 

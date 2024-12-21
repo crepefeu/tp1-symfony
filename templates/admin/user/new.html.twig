@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel utilisateur{% endblock %}
+
+{% block body %}
+<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Créer un nouvel utilisateur</h3>
+            <p class="mt-1 text-sm text-gray-500">Remplissez les informations ci-dessous pour créer un nouvel utilisateur.</p>
+        </div>
+        
+        <div class="px-4 py-5 sm:p-6">
+            {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+                <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                    {# Explicitly render each field except token #}
+                    {% for field in form %}
+                        {% if field.vars.name != '_token' %}
+                            <div class="space-y-1">
+                                {{ form_label(field, null, {'label_attr': {'class': 'text-sm font-medium text-gray-700'}}) }}
+                                {{ form_widget(field, {'attr': {'class': 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'}}) }}
+                                {{ form_errors(field, {'attr': {'class': 'text-sm text-red-600'}}) }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="mt-6 flex items-center justify-end space-x-3">
+                    <a href="{{ path('app_admin_user_index') }}" 
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Retour à la liste
+                    </a>
+                    <button type="submit" 
+                            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Créer l'utilisateur
+                    </button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

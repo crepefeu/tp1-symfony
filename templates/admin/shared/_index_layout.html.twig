@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    {# Flash Messages #}
+    {% for message in app.flashes('success') %}
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {# Header Section #}
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg border mb-6">
+        <div class="px-4 py-5 sm:px-6 border-b border-gray-200 flex justify-between items-center">
+            <div>
+                <h1 class="text-lg leading-6 font-medium text-gray-900">{% block index_title %}{% endblock %}</h1>
+                <p class="mt-1 text-sm text-gray-500">{% block index_description %}{% endblock %}</p>
+            </div>
+            {% block create_button %}{% endblock %}
+        </div>
+
+        {# Content Section #}
+        <div class="px-4 py-5 sm:p-6">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}

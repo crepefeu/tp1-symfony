@@ -8,6 +8,10 @@ framework:
     #esi: true
     #fragments: true
 
+    error_controller: error_controller
+    exceptions:
+        Symfony\Component\HttpKernel\Exception\NotFoundHttpException: null
+
 when@test:
     framework:
         test: true

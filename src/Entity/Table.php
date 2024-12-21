@@ -29,8 +29,8 @@ class Table
     #[ORM\JoinColumn(nullable: false)]
     private ?Restaurant $restaurant = null;
 
-    #[ORM\Column]
-    private ?bool $isActive = null;
+    #[ORM\Column(type: 'boolean')]
+    private bool $active = true;
 
     /**
      * @var Collection<int, Reservation>
@@ -96,15 +96,14 @@ class Table
         return $this;
     }
 
-    public function isActive(): ?bool
+    public function isActive(): bool
     {
-        return $this->isActive;
+        return $this->active;
     }
 
-    public function setActive(bool $isActive): static
+    public function setActive(bool $active): self
     {
-        $this->isActive = $isActive;
-
+        $this->active = $active;
         return $this;
     }
 

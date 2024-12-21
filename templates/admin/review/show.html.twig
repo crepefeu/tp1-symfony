@@ -1,0 +1,90 @@
+{% extends 'admin/shared/_show_layout.html.twig' %}
+
+{% block title %}Détails de l'avis{% endblock %}
+
+{% block show_title %}Détails de l'avis{% endblock %}
+{% block show_description %}Consultez les détails de l'avis{% endblock %}
+
+{% block content %}
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+            <div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                    Avis pour {{ review.restaurant.name }}
+                </h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                    Posté le {{ review.createdAt|date('d/m/Y H:i') }}
+                </p>
+            </div>
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                {% if review.isApproved %}
+                    bg-green-100 text-green-800
+                {% else %}
+                    bg-yellow-100 text-yellow-800
+                {% endif %}">
+                {{ review.isApproved ? 'Approuvé' : 'En attente' }}
+            </span>
+        </div>
+        <div class="border-t border-gray-200">
+            <dl>
+                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">Client</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        {{ review.user.email }}
+                    </dd>
+                </div>
+                <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">Note</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        <div class="flex items-center">
+                            <span class="font-medium">{{ review.rating }}/5</span>
+                            <div class="ml-2">
+                                {% for i in 1..5 %}
+                                    {% if i <= review.rating %}
+                                        <span class="text-yellow-400">★</span>
+                                    {% else %}
+                                        <span class="text-gray-300">★</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </dd>
+                </div>
+                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">Commentaire</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        {{ review.comment }}
+                    </dd>
+                </div>
+            </dl>
+        </div>
+        <div class="px-4 py-3 bg-gray-50 text-right sm:px-6 space-x-3">
+            {% if not review.isApproved %}
+                <form method="post" action="{{ path('app_admin_review_approve', {'id': review.id}) }}" class="inline">
+                    <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ review.id) }}">
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        Approuver
+                    </button>
+                </form>
+            {% else %}
+                <form method="post" action="{{ path('app_admin_review_disapprove', {'id': review.id}) }}" class="inline">
+                    <input type="hidden" name="_token" value="{{ csrf_token('disapprove' ~ review.id) }}">
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                        Désapprouver
+                    </button>
+                </form>
+            {% endif %}
+            <form method="post" action="{{ path('app_admin_review_delete', {'id': review.id}) }}" 
+                  class="inline" 
+                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet avis ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ review.id) }}">
+                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    Supprimer
+                </button>
+            </form>
+            <a href="{{ path('app_admin_review_index') }}" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Retour à la liste
+            </a>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'admin/shared/_index_layout.html.twig' %}
+
+{% block title %}Gestion des menus{% endblock %}
+
+{% block index_title %}Menus{% endblock %}
+{% block index_description %}Gérez les menus des restaurants{% endblock %}
+
+{% block content %}
+    <div class="mb-4">
+        <a href="{{ path('app_admin_menu_new') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Nouveau menu
+        </a>
+    </div>
+
+    <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Restaurant</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Menu</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for menu in menus %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <img class="h-10 w-10 rounded-full object-cover" 
+                                         src="{{ menu.restaurant.imageUrl|default('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4') }}" 
+                                         alt="{{ menu.restaurant.name }}">
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">{{ menu.restaurant.name }}</div>
+                                    {% if menu.category %}
+                                        <div class="text-sm text-gray-500">{{ menu.category }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">{{ menu.name }}</div>
+                            {% if menu.description %}
+                                <div class="text-sm text-gray-500">{{ menu.description|slice(0, 50) }}{% if menu.description|length > 50 %}...{% endif %}</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ menu.price|number_format(2, ',', ' ') }} €</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {% if menu.isActive %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ menu.isActive ? 'Actif' : 'Inactif' }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex justify-end space-x-3">
+                                <a href="{{ path('app_admin_menu_show', {'id': menu.id}) }}" class="text-indigo-600 hover:text-indigo-900">Voir</a>
+                                <a href="{{ path('app_admin_menu_edit', {'id': menu.id}) }}" class="text-indigo-600 hover:text-indigo-900">Modifier</a>
+                                <form method="post" action="{{ path('app_admin_menu_delete', {'id': menu.id}) }}" 
+                                      class="inline" 
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce menu ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ menu.id) }}">
+                                    <button type="submit" class="text-red-600 hover:text-red-900">Supprimer</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                            Aucun menu trouvé
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -11,16 +11,75 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\RestaurantRepository;
-use App\Entity\Table;
+use App\Enum\ReservationStatus;
+use App\Service\LoyaltyService;
 
 #[Route('/restaurant')]
 class RestaurantController extends AbstractController
 {
+    public function __construct(
+        private LoyaltyService $loyaltyService
+    ) {}
+
     #[Route('/', name: 'app_restaurant_index', methods: ['GET'])]
-    public function index(RestaurantRepository $restaurantRepository): Response
+    public function index(Request $request, RestaurantRepository $restaurantRepository): Response
     {
+        $search = $request->query->get('search');
+        $rating = $request->query->get('rating');
+        $sort = $request->query->get('sort', 'rating_desc');
+
+        $queryBuilder = $restaurantRepository->createQueryBuilder('r');
+
+        // Apply search filter with LOWER function for case-insensitive search
+        if ($search) {
+            $queryBuilder
+                ->andWhere('LOWER(r.name) LIKE LOWER(:search) OR LOWER(r.description) LIKE LOWER(:search)')
+                ->setParameter('search', '%' . strtolower($search) . '%');
+        }
+
+        // Apply rating filter
+        if ($rating) {
+            $queryBuilder
+                ->andWhere('r.averageRating >= :rating OR (
+                    SELECT AVG(rev.rating) 
+                    FROM App\Entity\Review rev 
+                    WHERE rev.restaurant = r
+                ) >= :rating')
+                ->setParameter('rating', (float) $rating);
+        }
+
+        // Apply sorting
+        switch ($sort) {
+            case 'rating_asc':
+                $queryBuilder->orderBy('r.averageRating', 'ASC');
+                break;
+            case 'rating_desc':
+                $queryBuilder->orderBy('r.averageRating', 'DESC');
+                break;
+            case 'name_asc':
+                $queryBuilder->orderBy('r.name', 'ASC');
+                break;
+            case 'name_desc':
+                $queryBuilder->orderBy('r.name', 'DESC');
+                break;
+        }
+
+        $restaurants = $queryBuilder->getQuery()->getResult();
+
+        // Update average ratings before returning results
+        foreach ($restaurants as $restaurant) {
+            if ($restaurant->getAverageRating() === null) {
+                $averageRating = $restaurant->getAverageRating(); // This calls the calculation method
+                if ($averageRating !== null) {
+                    $restaurant->setAverageRating($averageRating);
+                    $restaurantRepository->getEntityManager()->persist($restaurant);
+                }
+            }
+        }
+        $restaurantRepository->getEntityManager()->flush();
+
         return $this->render('restaurant/index.html.twig', [
-            'restaurants' => $restaurantRepository->findAll(),
+            'restaurants' => $restaurants,
         ]);
     }
 
@@ -28,52 +87,56 @@ class RestaurantController extends AbstractController
     public function show(Request $request, RestaurantRepository $restaurantRepository, int $id, EntityManagerInterface $entityManager): Response
     {
         $restaurant = $restaurantRepository->find($id);
-        $reservation = new Reservation();
-        $reservation->setRestaurant($restaurant);
-
-        $form = $this->createForm(ReservationType::class, $reservation);
-        $form->handleRequest($request);
-
+        
         if (!$restaurant) {
             throw $this->createNotFoundException('Restaurant not found');
         }
 
+        $reservation = new Reservation();
+        $reservation->setRestaurant($restaurant);
+
+        $form = $this->createForm(ReservationType::class, $reservation, [
+            'restaurant' => $restaurant,
+        ]);
+        
+        $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
-            // Find available table for the number of guests
-            $availableTable = $entityManager->getRepository(Table::class)
-                ->createQueryBuilder('t')
-                ->where('t.restaurant = :restaurant')
-                ->andWhere('t.capacity >= :guests')
-                ->andWhere('t.id NOT IN (
-                    SELECT IDENTITY(r.restaurantTable) 
-                    FROM App\Entity\Reservation r 
-                    WHERE r.dateTime = :dateTime 
-                    AND r.status != :canceledStatus
-                )')
-                ->setParameter('restaurant', $restaurant)
-                ->setParameter('guests', $reservation->getNumberOfGuests())
-                ->setParameter('dateTime', $reservation->getDateTime())
-                ->setParameter('canceledStatus', 'canceled')
-                ->orderBy('t.capacity', 'ASC')
-                ->setMaxResults(1)
-                ->getQuery()
-                ->getOneOrNullResult();
-
-            // Or use the logger for persistent debug info
-            dump($availableTable);
-
-            if (!$availableTable) {
-                $this->addFlash('error', 'Désolé, aucune table n\'est disponible pour cette date et ce nombre de personnes.');
-                return $this->redirectToRoute('app_restaurant_show', ['id' => $restaurant->getId()]);
+            // Check table capacity
+            $selectedTable = $reservation->getRestaurantTable();
+            $numberOfGuests = $reservation->getNumberOfGuests();
+            
+            if ($selectedTable && $numberOfGuests > $selectedTable->getCapacity()) {
+                $this->addFlash('error', sprintf(
+                    'Le nombre de personnes dépasse la capacité de la table sélectionnée (maximum %d personnes)',
+                    $selectedTable->getCapacity()
+                ));
+                return $this->render('restaurant/details.html.twig', [
+                    'restaurant' => $restaurant,
+                    'reservation_form' => $form->createView(),
+                ]);
             }
 
-            $reservation->setRestaurantTable($availableTable);
-            $reservation->setStatus('pending');
+            $reservation->setStatus(ReservationStatus::PENDING);
+            
+            // Set the user if logged in
+            if ($this->getUser()) {
+                $reservation->setUser($this->getUser());
+            }
+            
             $entityManager->persist($reservation);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Votre réservation a été enregistrée.');
-            return $this->redirectToRoute('app_restaurant_show', ['id' => $restaurant->getId()]);
+            // Add loyalty points if user is logged in
+            if ($this->getUser()) {
+                $this->loyaltyService->addPointsForReservation($reservation, $this->getUser());
+                $this->addFlash('success', 'Réservation confirmée ! Vous avez gagné des points de fidélité.');
+            } else {
+                $this->addFlash('success', 'Votre réservation a été enregistrée.');
+            }
+
+            // Redirect to the reservation recap page
+            return $this->redirectToRoute('app_reservation_show', ['id' => $reservation->getId()]);
         }
 
         return $this->render('restaurant/details.html.twig', [

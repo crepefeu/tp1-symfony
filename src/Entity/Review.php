@@ -27,6 +27,16 @@ class Review
     #[ORM\JoinColumn(nullable: false)]
     private ?Restaurant $restaurant = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)] // Change to true temporarily
+    private ?User $user = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $customerEmail = null;
+
+    #[ORM\Column(options: ['default' => false])]
+    private bool $isApproved = false;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -76,6 +86,50 @@ class Review
     public function setRestaurant(?Restaurant $restaurant): static
     {
         $this->restaurant = $restaurant;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    public function getCustomerEmail(): ?string
+    {
+        return $this->customerEmail;
+    }
+
+    public function setCustomerEmail(?string $customerEmail): static
+    {
+        $this->customerEmail = $customerEmail;
+
+        return $this;
+    }
+
+    /**
+     * Get the display email - either from user or customer email
+     */
+    public function getDisplayEmail(): ?string
+    {
+        return $this->user?->getEmail() ?? $this->customerEmail ?? 'Anonyme';
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->isApproved;
+    }
+
+    public function setIsApproved(bool $isApproved): static
+    {
+        $this->isApproved = $isApproved;
 
         return $this;
     }

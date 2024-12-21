@@ -40,6 +40,9 @@ class Restaurant
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
 
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $averageRating = null;
+
     /**
      * @var Collection<int, Menu>
      */
@@ -198,6 +201,29 @@ class Restaurant
     {
         $this->updatedAt = $updatedAt;
 
+        return $this;
+    }
+
+    public function getAverageRating(): ?float
+    {
+        if ($this->reviews->isEmpty()) {
+            return null;
+        }
+
+        $sum = 0;
+        $count = 0;
+
+        foreach ($this->reviews as $review) {
+            $sum += $review->getRating();
+            $count++;
+        }
+
+        return round($sum / $count, 1);
+    }
+
+    public function setAverageRating(?float $averageRating): self
+    {
+        $this->averageRating = $averageRating;
         return $this;
     }
 
