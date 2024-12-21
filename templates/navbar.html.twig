@@ -40,9 +40,9 @@
 						</a>
 					{% endif %}
 					{% if is_granted('ROLE_ADMIN') %}
-						<button href="{{ path('app_admin_dashboard') }}" class="text-indigo-600 bg-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+						<a href="{{ path('app_admin_dashboard') }}" class="text-indigo-600 bg-white hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
 							Administration
-						</button>
+						</a>
 					{% endif %}
 				</div>
 			</div>

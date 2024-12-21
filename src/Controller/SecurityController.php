@@ -27,6 +27,12 @@ class SecurityController extends AbstractController
         ]);
     }
 
+    #[Route(path: '/banned', name: 'app_banned')]
+    public function banned(): Response
+    {
+        return $this->render('security/banned.html.twig');
+    }
+
     #[Route(path: '/logout', name: 'app_logout')]
     public function logout(): void {}
 }

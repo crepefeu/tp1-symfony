@@ -16,6 +16,14 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN')]
 class AdminUserController extends AbstractController
 {
+    #[Route('/', name: 'app_admin_user_index', methods: ['GET'])]
+    public function index(UserRepository $userRepository): Response
+    {
+        return $this->render('admin/user/index.html.twig', [
+            'users' => $userRepository->findAll(),
+        ]);
+    }
+
     #[Route('/{id}', name: 'app_admin_user_show', methods: ['GET'])]
     public function show(User $user): Response
     {
@@ -33,7 +41,7 @@ class AdminUserController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
             $this->addFlash('success', 'Utilisateur modifié avec succès');
-            return $this->redirectToRoute('admin_user_index');
+            return $this->redirectToRoute('app_admin_user_index');
         }
 
         return $this->render('admin/user/edit.html.twig', [
@@ -56,7 +64,7 @@ class AdminUserController extends AbstractController
         $entityManager->flush();
 
         $this->addFlash('success', 'Statut de bannissement modifié avec succès');
-        return $this->redirectToRoute('admin_user_index');
+        return $this->redirectToRoute('app_admin_user_index');
     }
 
     // Route for new user
@@ -72,7 +80,7 @@ class AdminUserController extends AbstractController
             $entityManager->flush();
 
             $this->addFlash('success', 'Utilisateur créé avec succès');
-            return $this->redirectToRoute('admin_user_index');
+            return $this->redirectToRoute('app_admin_user_index');
         }
 
         return $this->render('admin/user/new.html.twig', [
