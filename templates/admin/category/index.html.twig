@@ -1,0 +1,51 @@
+{# templates/admin/category/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Categories Management{% endblock %}
+
+{% block body %}
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold">Categories</h1>
+            <a href="{{ path('app_admin_category_new') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Create New
+            </a>
+        </div>
+
+        <div class="bg-white shadow-md rounded my-6">
+            <table class="min-w-full table-auto">
+                <thead>
+                    <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                        <th class="py-3 px-6 text-left">ID</th>
+                        <th class="py-3 px-6 text-left">Name</th>
+                        <th class="py-3 px-6 text-left">Description</th>
+                        <th class="py-3 px-6 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-600 text-sm font-light">
+                    {% for category in categories %}
+                        <tr class="border-b border-gray-200 hover:bg-gray-100">
+                            <td class="py-3 px-6 text-left">{{ category.id }}</td>
+                            <td class="py-3 px-6 text-left">{{ category.name }}</td>
+                            <td class="py-3 px-6 text-left">{{ category.description }}</td>
+                            <td class="py-3 px-6 text-center">
+                                <div class="flex item-center justify-center">
+                                    <a href="{{ path('app_admin_category_show', {'id': category.id}) }}" class="text-blue-500 hover:text-blue-700 mx-2">
+                                        View
+                                    </a>
+                                    <a href="{{ path('app_admin_category_edit', {'id': category.id}) }}" class="text-yellow-500 hover:text-yellow-700 mx-2">
+                                        Edit
+                                    </a>
+                                    <form method="post" action="{{ path('app_admin_category_delete', {'id': category.id}) }}" class="inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ category.id) }}">
+                                        <button class="text-red-500 hover:text-red-700 mx-2">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

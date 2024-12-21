@@ -1,0 +1,128 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de bord administrateur{% endblock %}
+
+{% block javascripts %}
+<script>
+const eventSource = new EventSource("{{ mercure('restaurant/reservations')|escape('js') }}");
+const notificationsContainer = document.getElementById('notifications');
+
+eventSource.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    if (data.type === 'reservation') {
+        const notification = document.createElement('div');
+        notification.classList.add('bg-blue-100', 'border-l-4', 'border-blue-500', 'text-blue-700', 'p-4', 'mb-4');
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <div class="py-1">
+                    <svg class="h-6 w-6 text-blue-500 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-bold">Nouvelle réservation</p>
+                    <p>Restaurant: ${data.data.restaurant}</p>
+                    <p>Date: ${new Date(data.data.date).toLocaleString()}</p>
+                    <p>Personnes: ${data.data.guests}</p>
+                </div>
+            </div>
+        `;
+        notificationsContainer.prepend(notification);
+        
+        // Remove notification after 5 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+};
+</script>
+{% endblock %}
+
+{% block body %}
+<div class="py-12">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold">Tableau de bord administrateur</h1>
+            <div id="notifications" class="space-y-2"></div>
+        </div>
+        
+        {# Statistics Cards #}
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-xl font-semibold mb-2">Utilisateurs</h3>
+                <p class="text-3xl">{{ users_count }}</p>
+                <a href="{{ path('app_admin_user_index') }}" class="text-blue-500 hover:underline">Gérer →</a>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-xl font-semibold mb-2">Restaurants</h3>
+                <p class="text-3xl">{{ restaurants_count }}</p>
+                <a href="{{ path('app_admin_restaurant_index') }}" class="text-blue-500 hover:underline">Gérer →</a>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-xl font-semibold mb-2">Réservations</h3>
+                <p class="text-3xl">{{ reservations_count }}</p>
+                <a href="{{ path('app_admin_reservation_index') }}" class="text-blue-500 hover:underline">Gérer →</a>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-xl font-semibold mb-2">Avis</h3>
+                <p class="text-3xl">{{ reviews_count }}</p>
+                <a href="{{ path('app_admin_review_index') }}" class="text-blue-500 hover:underline">Gérer →</a>
+            </div>
+        </div>
+
+        {# Recent Activity #}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold mb-4">Dernières réservations</h2>
+                <div class="space-y-4">
+                    {% for reservation in recent_reservations %}
+                        <div class="border-b pb-2">
+                            <p class="font-semibold">{{ reservation.restaurant.name }}</p>
+                            <p class="text-sm text-gray-600">{{ reservation.date|date('d/m/Y H:i') }} - {{ reservation.guests }} personnes</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold mb-4">Derniers avis</h2>
+                <div class="space-y-4">
+                    {% for review in recent_reviews %}
+                        <div class="border-b pb-2">
+                            <p class="font-semibold">{{ review.restaurant.name }}</p>
+                            <div class="flex items-center text-yellow-400">
+                                {% for i in 1..5 %}
+                                    {% if i <= review.rating %}
+                                        ★
+                                    {% else %}
+                                        ☆
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <p class="text-sm text-gray-600">{{ review.comment|slice(0, 100) }}...</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {# Quick Actions #}
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold mb-4">Actions rapides</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="{{ path('app_admin_restaurant_new') }}" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Nouveau restaurant
+                </a>
+                <a href="{{ path('app_admin_user_new') }}" class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                    Nouvel utilisateur
+                </a>
+                <a href="{{ path('app_admin_category_index') }}" class="inline-flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                    Gérer catégories
+                </a>
+                <a href="{{ path('app_admin_discount_index') }}" class="inline-flex items-center justify-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">
+                    Gérer promotions
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

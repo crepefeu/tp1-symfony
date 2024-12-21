@@ -1,0 +1,128 @@
+{# templates/user/profile.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon compte
+{% endblock %}
+
+{% block body %}
+	<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+		{% for message in app.flashes('success') %}
+			<div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
+				{{ message }}
+			</div>
+		{% endfor %}
+
+		<div class="bg-white shadow overflow-hidden sm:rounded-lg">
+			<div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+				<h3 class="text-lg leading-6 font-medium text-gray-900">Informations du compte</h3>
+				<button onclick="toggleEdit()" id="editButton" class="text-indigo-600 hover:text-indigo-900">
+					<span id="editButtonText">Modifier</span>
+				</button>
+			</div>
+
+			{{ form_start(form, {'attr': {'id': 'profileForm'}}) }}
+			<div class="border-t border-gray-200">
+				<dl>
+					<div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+						<dt class="text-sm font-medium text-gray-500">Prénom</dt>
+						<dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+							<span class="view-mode">{{ app.user.firstName }}</span>
+							<div class="edit-mode hidden">
+								{{ form_widget(form.firstName, {
+                                'attr': {
+                                    'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
+                                }
+                            }) }}
+							</div>
+						</dd>
+					</div>
+					<div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+						<dt class="text-sm font-medium text-gray-500">Nom</dt>
+						<dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+							<span class="view-mode">{{ app.user.lastName }}</span>
+							<div class="edit-mode hidden">
+								{{ form_widget(form.lastName, {
+                                'attr': {
+                                    'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
+                                }
+                            }) }}
+							</div>
+						</dd>
+					</div>
+					<div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+						<dt class="text-sm font-medium text-gray-500">Email</dt>
+						<dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+							<span class="view-mode">{{ app.user.email }}</span>
+							<div class="edit-mode hidden">
+								{{ form_widget(form.email, {
+                                'attr': {
+                                    'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
+                                }
+                            }) }}
+							</div>
+						</dd>
+					</div>
+					<div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+						<dt class="text-sm font-medium text-gray-500">Mot de passe</dt>
+						<dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+							<span class="view-mode">*********</span>
+							<div class="edit-mode hidden">
+								{{ form_widget(form.plainPassword, {
+                                'attr': {
+                                    'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
+                                }
+                            }) }}
+							</div>
+						</dd>
+					</div>
+					<div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+						<dt class="text-sm font-medium text-gray-500">Téléphone</dt>
+						<dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+							<span class="view-mode">{{ app.user.phone }}</span>
+							<div class="edit-mode hidden">
+								{{ form_widget(form.phone, {
+                                'attr': {
+                                    'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
+                                }
+                            }) }}
+							</div>
+						</dd>
+					</div>
+					<div class="hidden bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 edit-mode">
+						<dt class="text-sm font-medium text-gray-500"></dt>
+						<dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+							<button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+								Sauvegarder
+							</button>
+							<button type="button" onclick="toggleEdit()" class="ml-3 inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+								Annuler
+							</button>
+						</dd>
+					</div>
+				</dl>
+			</div>
+			{{ form_end(form) }}
+
+			{# Rest of the profile content (loyalty points, reservations) stays the same #}
+		</div>
+	</div>
+
+	{% block javascripts %}
+		<script>
+			function toggleEdit() {
+                const viewModeElements = document.querySelectorAll('.view-mode');
+                const editModeElements = document.querySelectorAll('.edit-mode');
+                const editButtonText = document.getElementById('editButtonText');
+
+                viewModeElements.forEach(el => el.classList.toggle('hidden'));
+                editModeElements.forEach(el => el.classList.toggle('hidden'));
+
+                if (editButtonText.textContent === 'Modifier') {
+                editButtonText.textContent = 'Annuler';
+                } else {
+                editButtonText.textContent = 'Modifier';
+                }
+            }
+		</script>
+	{% endblock %}
+{% endblock %}

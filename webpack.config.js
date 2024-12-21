@@ -76,6 +76,10 @@ Encore
         '@': path.resolve(__dirname, 'assets'),
         '@symfony/stimulus-bridge/controllers.json': path.resolve(__dirname, 'assets/controllers.json'),
     })
+    .copyFiles({
+        from: './assets/images',
+        to: 'images/[path][name].[ext]',
+    })
 ;
 
 module.exports = Encore.getWebpackConfig();

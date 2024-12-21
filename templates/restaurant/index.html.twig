@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nos Restaurants{% endblock %}
+
+{% block body %}
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 bg-white border-b border-gray-200">
+                    <h1 class="text-2xl font-bold mb-6">Nos Restaurants</h1>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for restaurant in restaurants %}
+                            <div class="bg-white rounded-lg shadow p-6">
+                                <h2 class="text-xl font-bold mb-2">{{ restaurant.name }}</h2>
+                                <p class="text-gray-600 mb-4">{{ restaurant.description }}</p>
+                                <div class="text-sm text-gray-500">
+                                    <p><strong>Adresse :</strong> {{ restaurant.address }}</p>
+                                    <p><strong>Téléphone :</strong> {{ restaurant.phone }}</p>
+                                </div>
+                                <div class="mt-4">
+                                    {% for category in restaurant.categories %}
+                                        <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2">
+                                            {{ category.name }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                                <div class="mt-4">
+                                    <a href="{{ path('app_reservation_new', {'restaurant': restaurant.id}) }}" 
+                                       class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                        Réserver
+                                    </a>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="col-span-3 text-center text-gray-500">
+                                Aucun restaurant trouvé
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

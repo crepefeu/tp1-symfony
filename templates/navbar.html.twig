@@ -1,0 +1,51 @@
+<nav class="bg-gray-800">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="flex items-center justify-between h-16">
+			<div class="flex items-center">
+				<div class="flex-shrink-0">
+					<a href="{{ path('app_home') }}" class="text-white font-bold">RestoBooking</a>
+				</div>
+				<div class="hidden md:block">
+					<div class="ml-10 flex items-baseline space-x-4">
+						<a href="{{ path('app_restaurant_index') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+							Restaurants
+						</a>
+						{% if is_granted('ROLE_ADMIN') %}
+							<a href="{{ path('app_admin_dashboard') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+								Ajouter un restaurant
+							</a>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+			<div class="hidden md:block">
+				<div class="ml-4 flex items-center md:ml-6 gap-3">
+					{% if app.user %}
+						<a href="{{ path('app_account') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+							{{ app.user.email }}
+						</a>
+						<span class="text-gray-300 px-3 py-2"></span>
+						<a href="{{ path('app_loyalty_index') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+							Points de fidélité ({{ app.user.loyaltyPoints }})
+						</a>
+						<a href="{{ path('app_logout') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+							Déconnexion
+						</a>
+					{% else %}
+						<a href="{{ path('app_login') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+							Connexion
+						</a>
+						<a href="{{ path('app_register') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+							Inscription
+						</a>
+					{% endif %}
+					{% if is_granted('ROLE_ADMIN') %}
+						<button href="{{ path('app_admin_dashboard') }}" class="text-indigo-600 bg-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+							Administration
+						</button>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+</nav>

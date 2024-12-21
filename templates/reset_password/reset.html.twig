@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reset your password
+{% endblock %}
+
+{% block body %}
+	<div class="max-w-md mx-auto mt-8">
+		<div class="bg-white p-6 rounded-lg shadow-md">
+			<h1 class="text-2xl font-bold mb-4">Reset your password</h1>
+
+			{{ form_start(resetForm) }}
+			{{ form_row(resetForm.plainPassword, {
+                    'attr': {'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500'},
+                    'label_attr': {'class': 'block text-sm font-medium text-gray-700'}
+                }) }}
+
+			<div class="mt-4">
+				<button class="w-full bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700">
+					Reset password
+				</button>
+			</div>
+			{{ form_end(resetForm) }}
+		</div>
+	</div>
+{% endblock %}

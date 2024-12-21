@@ -13,6 +13,18 @@
             "src/Repository/.gitignore"
         ]
     },
+    "doctrine/doctrine-fixtures-bundle": {
+        "version": "4.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "3.0",
+            "ref": "1f5514cfa15b947298df4d771e694e578d4c204d"
+        },
+        "files": [
+            "src/DataFixtures/AppFixtures.php"
+        ]
+    },
     "doctrine/doctrine-migrations-bundle": {
         "version": "3.3",
         "recipe": {
@@ -24,6 +36,31 @@
         "files": [
             "config/packages/doctrine_migrations.yaml",
             "migrations/.gitignore"
+        ]
+    },
+    "php-amqplib/rabbitmq-bundle": {
+        "version": "2.17",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "1.12",
+            "ref": "ce3ca2e4577270c4f518539aa6b9e878998fcfef"
+        },
+        "files": [
+            "config/packages/old_sound_rabbit_mq.yaml",
+            "src/Consumer/.gitignore"
+        ]
+    },
+    "php-http/discovery": {
+        "version": "1.20",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "1.18",
+            "ref": "f45b5dd173a27873ab19f5e3180b2f661c21de02"
+        },
+        "files": [
+            "config/packages/http_discovery.yaml"
         ]
     },
     "phpunit/phpunit": {
@@ -143,6 +180,18 @@
             "version": "1.0",
             "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
         }
+    },
+    "symfony/mercure-bundle": {
+        "version": "0.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "0.3",
+            "ref": "528285147494380298f8f991ee8c47abebaf79db"
+        },
+        "files": [
+            "config/packages/mercure.yaml"
+        ]
     },
     "symfony/messenger": {
         "version": "7.2",
@@ -310,6 +359,18 @@
             "config/packages/webpack_encore.yaml",
             "package.json",
             "webpack.config.js"
+        ]
+    },
+    "symfonycasts/reset-password-bundle": {
+        "version": "1.23",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "1.0",
+            "ref": "97c1627c0384534997ae1047b93be517ca16de43"
+        },
+        "files": [
+            "config/packages/reset_password.yaml"
         ]
     },
     "twig/extra-bundle": {
