@@ -50,7 +50,7 @@ class ResetPasswordController extends AbstractController
     }
 
     #[Route('/reset/{token}', name: 'app_reset_password')]
-    public function reset(Request $request, UserPasswordHasherInterface $passwordHasher, string $token = null): Response
+    public function reset(Request $request, string $token = null): Response
     {
         if ($token) {
             // Store the token in session and maintain the session
@@ -89,6 +89,7 @@ class ResetPasswordController extends AbstractController
 
             // Force Doctrine to detect changes
             $this->entityManager->persist($user);
+
             // Flush changes - this will trigger the subscriber
             $this->entityManager->flush();
 
@@ -121,7 +122,7 @@ class ResetPasswordController extends AbstractController
             dump($resetToken);
         } catch (TooManyPasswordRequestsException $e) {
             $this->addFlash('reset_password_error', sprintf(
-                'You cannot request another password reset yet. Please try again in %d minutes.',
+                'Vous ne pouvez pas demander une autre réinitialisation de mot de passe pour le moment. Veuillez réessayer dans %d minutes.',
                 ceil(($e->getAvailableAt()->getTimestamp() - time()) / 60)
             ));
 

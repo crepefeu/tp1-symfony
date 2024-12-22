@@ -19,11 +19,11 @@ class ReservationManager
 
     public function createReservation(Reservation $reservation): void
     {
-        // Persister la réservation
+        // Persist the reservation
         $this->entityManager->persist($reservation);
         $this->entityManager->flush();
 
-        // Envoyer la notification email de façon asynchrone
+        // Send email notification to the user
         $this->messageBus->dispatch(new SendReservationEmailNotification(
             $reservation->getId(),
             $reservation->getRestaurant()->getName(),
@@ -31,7 +31,7 @@ class ReservationManager
             $reservation->getNumberOfGuests()
         ));
 
-        // Notification temps réel
+        // Real-time notification
         $this->sendRealTimeNotification($reservation);
     }
 
